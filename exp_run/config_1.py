@@ -2,7 +2,7 @@ import os
 
 # Use this string to write a brief detail about the current experiment. This
 # string will be saved in a logger for this particular experiment
-EXPERIMENT_BRIEF = ''
+EXPERIMENT_BRIEF = 'Initial experiment with default settings'
 
 # Set to complete to use all the data
 # Set to sub to use training/dev sets only
@@ -13,8 +13,7 @@ EXPERIMENT_BRIEF = ''
 EXPERIMENT_DETAILS = {'FEATURE_EXP': 'mel',
                       'CLASS_WEIGHTS': False,
                       'USE_GENDER_WEIGHTS': False,
-                      'SUB_SAMPLE_ND_CLASS': True,  # Make len(dep) == len(
-                      # ndep)
+                      'SUB_SAMPLE_ND_CLASS': True,  # Make len(dep) == len(ndep)
                       'CROP': True,
                       'OVERSAMPLE': False,
                       'SPLIT_BY_GENDER': False,  # Only for use in test mode
@@ -28,7 +27,10 @@ EXPERIMENT_DETAILS = {'FEATURE_EXP': 'mel',
                       'TOTAL_ITERATIONS': 3280,
                       'ITERATION_EPOCH': 1,
                       'SUB_DIR': 'exp_1',
-                      'EXP_RUNTHROUGH': 5}
+                      'EXP_RUNTHROUGH': 5,
+                      # TODO: they have been added from preprocess config
+                      'DATASET_IS_BACKGROUND': False,
+                      'REMOVE_BACKGROUND': True}
 # Determine the level of crop, min file found in training set or maximum file
 # per set (ND / D) or (FND, MND, FD, MD)
 MIN_CROP = True
@@ -89,11 +91,11 @@ else:
 if EXPERIMENT_DETAILS['USE_GENDER_WEIGHTS']:
     EXPERIMENT_DETAILS['SUB_DIR'] = EXPERIMENT_DETAILS['SUB_DIR'] + '_gen'
 
-DATASET = '/path/to/DAIC-WOZ/dataset'
-WORKSPACE_MAIN_DIR = '/path/to/save/experiment/outputs'
-WORKSPACE_FILES_DIR = '/path/to/depaudionet/code'
-TRAIN_SPLIT_PATH = os.path.join(DATASET, 'train_split_Depression_AVEC2017.csv')
-DEV_SPLIT_PATH = os.path.join(DATASET, 'dev_split_Depression_AVEC2017.csv')
+DATASET = '/home/ebbarbera/adbailey1/daic_woz'
+WORKSPACE_MAIN_DIR = '/home/ebbarbera/adbailey1/processed_data'
+WORKSPACE_FILES_DIR = '/home/ebbarbera/depaudionet'
+TRAIN_SPLIT_PATH = os.path.join(DATASET, 'training_split.csv')
+DEV_SPLIT_PATH = os.path.join(DATASET, 'dev_split.csv')
 # TEST_SPLIT_PATH = os.path.join(DATASET, 'test_split_Depression_AVEC2017.csv')
 TEST_SPLIT_PATH = os.path.join(DATASET, 'full_test_split.csv')
 FULL_TRAIN_SPLIT_PATH = os.path.join(DATASET, 'full_train_split_Depression_AVEC2017.csv')

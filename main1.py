@@ -1,3 +1,4 @@
+
 import logging
 import logging.handlers
 import argparse
@@ -21,11 +22,12 @@ from exp_run.plotter import plot_graph
 from exp_run import config_dataset
 import pickle
 from exp_run.models_pytorch import CustomMel7 as CustomMel
+# from exp_run.models_pytorch import CNN
 from exp_run.models_pytorch import CustomRaw1 as CustomRaw
 from exp_run import config_1 as config
 import warnings
 warnings.filterwarnings('ignore')
-learn_rate_factor = 2
+learn_rate_factor = 3
 EPS = 1e-12
 
 
@@ -438,6 +440,7 @@ def create_model():
         model: obj - The model to be used for training during experiment
     """
     if config.EXPERIMENT_DETAILS['FEATURE_EXP'] == 'mel':
+        # model = CustomMel()
         model = CustomMel()
     elif config.EXPERIMENT_DETAILS['FEATURE_EXP'] == 'raw':
         model = CustomRaw()
@@ -804,7 +807,7 @@ def final_organisation(scores, train_pred, val_pred, df, patience, epoch,
         main_logger.info(f"System will exit as the validation loss "
                          f"has not improved for {patience} epochs")
     print(f"System will exit as the validation loss has not "
-          "improved for {patience} epochs")
+          f"improved for {patience} epochs")
     util.save_model_outputs(model_dir,
                             df,
                             train_pred,
@@ -1037,8 +1040,8 @@ def train(model, workspace_files_dir):
     if checkpoint:
         start_epoch = util.load_model(checkpoint_run,
                                       model,
-                                      optimizer,
-                                      cuda)
+                                      cuda,
+                                      optimizer)  # TODO: parameters order was wrong
     else:
         start_epoch = 0
         # train_acc, train_fscore, train_loss, val_acc, val_fscore, val_loss
@@ -1125,6 +1128,10 @@ def train(model, workspace_files_dir):
                     logger=main_logger,
                     gender_balance=gender_balance)
 
+                # TODO: added
+                per_epoch_val_pred = per_epoch_val_pred[0]  # TODO: added
+                # TODO: added
+
             complete_results, best_scores = \
                 update_complete_results(complete_results,
                                         avg_counter,
@@ -1142,7 +1149,7 @@ def train(model, workspace_files_dir):
 
             comp_train_pred, comp_val_pred = compile_train_val_pred(
                 per_epoch_train_pred,
-                per_epoch_val_pred[0],
+                per_epoch_val_pred,  # TODO: before per_epoch_val_pred[0]
                 comp_train_pred,
                 comp_val_pred,
                 placeholder)
@@ -1351,15 +1358,17 @@ def test():
                 per_epoch, outputs, accum, targets = per_epoch
                 for count, folder in enumerate(outputs):
                     if folder not in results['output'].keys():
-                        results['output'][folder] = np.array(outputs[folder][0])
+                        # TODO: before results['output'][folder] = np.array(outputs[folder][0])
+                        results['output'][folder] = np.array(outputs[folder])
                         results['accum'][folder] = accum[folder]
                         if gender_balance and not hidden_test:
                             results['target'][folder] = targets[folder] % 2
                         elif not gender_balance and not hidden_test:
                             results['target'][folder] = targets[folder]
                     else:
+                        # TODO: before results['output'][folder] = np.append( results['output'][folder], outputs[folder][0])
                         results['output'][folder] = np.append(
-                            results['output'][folder], outputs[folder][0])
+                            results['output'][folder], outputs[folder])
 
     if data_type == 'test':
         if config.EXPERIMENT_DETAILS['SPLIT_BY_GENDER']:
@@ -1420,6 +1429,7 @@ def test():
 
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
     sub_parser = parser.add_subparsers(dest='mode')
 
@@ -1493,6 +1503,17 @@ if __name__ == '__main__':
                                   'means, that the most recent folder will be '
                                   'deleted automatically to speed up debugging')
     args = parser.parse_args()
+
+    # TODO: added to debug the code in pycharm
+    if not args.mode:
+        args.mode = "test"
+        args.debug = False
+        args.vis = True
+        args.cuda = True
+        args.validate = True
+        args.position = 1
+        args.prediction_metric = 2
+    # TODO: added to debug the code in pycharm
 
     mode = args.mode
     debug = args.debug
