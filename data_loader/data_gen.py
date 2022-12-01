@@ -420,7 +420,7 @@ class GenerateData:
             indices = np.concatenate((dev_indices_zeros_f, dev_indices_ones_f,
                                       dev_indices_zeros_m,
                                       dev_indices_ones_m), axis=0).astype(int)
-        else:
+        else:  # create array with indixes for each class
             dev_indices_zeros = np.array(self.zeros_index_dev)
             dev_indices_ones = np.array(self.ones_index_dev)
             indices = np.concatenate((dev_indices_zeros, dev_indices_ones),
@@ -432,7 +432,7 @@ class GenerateData:
         indices = indices.tolist()
         # This is not necessary for validation however, if removed, previous
         # experiments may not be re-created perfectly due to random number gen
-        if self.checkpoint:
+        if self.checkpoint:  # shuffle indices epoch times to get always same resuts
             for i in range(epoch):
                 random.shuffle(indices)
                 self.checkpoint = False

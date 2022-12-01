@@ -308,7 +308,7 @@ def evaluate(model, generator, data_type, class_weights, comp_res, class_num,
     # Forward
     results_dict = forward(model=model,
                            generate_dev=generate_dev,
-                           data_type=data_type)
+                           data_type=data_type)  # compute all batches results and concatenate them into an array
 
     outputs = results_dict['output']  # (audios_num, classes_num)
     folders = results_dict['folder']
@@ -317,15 +317,15 @@ def evaluate(model, generator, data_type, class_weights, comp_res, class_num,
     collected_output = {}
     output_for_loss = {}
     collected_targets = {}
-    counter = {}
+    counter = {}  # sum round predictions of each sample and divide by the total count
     for p, fol in enumerate(folders):
         if fol not in collected_output.keys():
             collected_targets[fol] = targets[p]
-            output_for_loss[fol] = outputs[p]
+            output_for_loss[fol] = outputs[p]  # this variable seems to not be used
             collected_output[fol] = np.round(outputs[p])
             counter[fol] = 1
         else:
-            output_for_loss[fol] = outputs[p]
+            output_for_loss[fol] = outputs[p]  # this variable seems to not be used
             collected_output[fol] += np.round(outputs[p])
             counter[fol] += 1
 
@@ -336,7 +336,7 @@ def evaluate(model, generator, data_type, class_weights, comp_res, class_num,
     new_outputs = []
     new_folders = []
     new_targets = []
-    new_output_for_loss = []
+    new_output_for_loss = []  # this variable seems to not be used
     # This is essentially performing majority vote. We have rounded all the
     # predictions made per file. We now divide the resulting value by the
     # number of instances per file.
@@ -344,7 +344,7 @@ def evaluate(model, generator, data_type, class_weights, comp_res, class_num,
         tmp = collected_output[co] / counter[co]
         new_outputs.append(tmp)
         tmp = output_for_loss[co] / counter[co]
-        new_output_for_loss.append(tmp)
+        new_output_for_loss.append(tmp)  # this variable seems to not be used
         new_folders.append(co)
         new_targets.append(collected_targets[co])
 
@@ -1220,6 +1220,7 @@ def test():
     average the experiment models, calculate the majority vote of the
     experiment models.
     """
+    # define if using val or test and if the test labels are showed
     hidden_test = False
     if validate:
         tester = False
@@ -1230,6 +1231,7 @@ def test():
         if config.TEST_SPLIT_PATH.split('/')[-1] == 'test_split_Depression_AVEC2017.csv':
             hidden_test = True
 
+    # define storing arrays with dims depending on gender configuration and test type
     counter = 0
     if config.EXPERIMENT_DETAILS['SPLIT_BY_GENDER']:
         comp_scores = np.zeros((exp_runthrough, 20))
@@ -1242,7 +1244,9 @@ def test():
             results = {'female': {'output': {}, 'target': {}, 'accum': {}},
                        'male': {'output': {}, 'target': {}, 'accum': {}}}
 
+    # compute the test process for each of the experiments
     for exp_num in range(exp_runthrough):
+        # setup model directory, logger, num of classes (2) and optimizer
         model_dir = os.path.join(current_dir,
                                  'model',
                                  folder_extensions[exp_num])
@@ -1252,7 +1256,7 @@ def test():
         else:
             path_to_logger_for_test = None
 
-        if data_type == 'test' and counter == 0 or data_type == 'dev':
+        if data_type == 'test' and counter == 0 or data_type == 'dev':  # (for all cases, since counter is always 0)
             main_logger, model, _, _, _ = setup(current_dir,
                                                 model_dir,
                                                 data_type,
@@ -1267,13 +1271,14 @@ def test():
                 current_epoch = int(file.split('_')[1])
                 model_dir = os.path.join(model_dir, file)
 
+        # load the model and random states with last epoch data
         _ = util.load_model(checkpoint_path=model_dir,
                             model=model,
                             optimizer=optimizer,
                             cuda=cuda)
         data_saver = util.load_model_outputs(model_dir,
                                              'test')
-
+        # load the data (for all cases since it seems that counter is always 0)
         if data_type == 'test' and counter == 0 or data_type == 'dev':
             generator, cw = organiser.run_test(config,
                                                main_logger,
@@ -1329,7 +1334,7 @@ def test():
                             results[dictionary_key]['output'][folder] = np.append(
                                 results[dictionary_key]['output'][folder],
                                 outputs[folder][0])
-        else:
+        else:  # compute the evaluation (main function to consider)
             scores, per_epoch = evaluate(model,
                                          generator,
                                          data_type,
@@ -1342,7 +1347,7 @@ def test():
                                          gender_balance,
                                          hidden_test)
 
-            if not hidden_test:
+            if not hidden_test:  # rearrange EXPERIMENT scores and display them
                 scores[8] = np.mean(scores[0:2])
                 scores[9] = np.mean(scores[6:8])
                 # Avg_acc, Acc_0, Acc_1, F_Score_avg, F_Score_0, F_Score_1, tn_fp_fn_tp
@@ -1392,7 +1397,7 @@ def test():
                                               hidden_test)
             print("Test output Scores: ", comp_scores)
             main_logger.info(f"Test output Scores: {comp_scores}")
-    else:
+    else:   # display final scores (seems that metric_score is not used when validation is tested)
         # Acc_avg, Acc_0, Acc_1, F_avg, F_0, F_1, tn_fp_fn_tp
         comp_scores_avg = np.mean(comp_scores, axis=0)
         print(f"\nAverage: {comp_scores_avg}")
