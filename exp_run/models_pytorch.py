@@ -1,6 +1,7 @@
 import math
 import torch
 import torch.nn as nn
+from torch.nn import functional as F
 
 
 def init_layer(layer):
@@ -263,7 +264,7 @@ class FullyConnected(nn.Module):
                 if self.act:
                     x = self.act(self.fc(x))
                 else:
-                    x = self.fc(x)        
+                    x = self.fc(x)
 
         return x
 
@@ -1047,5 +1048,29 @@ class CustomRaw4(nn.Module):
         x = torch.transpose(x, 1, 2)
         x, _ = self.lstm(x)
         x = self.fc(x[:, -1, :].reshape(batch, -1))
-
         return x
+
+class CNN(nn.Module):
+    def __init__(self):
+        super(CNN, self).__init__()
+        self.conv2d_1 = nn.Conv2d(1, 32, (1, 7), 1)
+        self.conv2d_2 = nn.Conv2d(32, 32, (1, 7), 2)
+        self.dense_1 = nn.Linear(3040, 128)
+        self.dense_2 = nn.Linear(128, 128)
+        self.dense_3 = nn.Linear(128, 1)
+        self.dropout = nn.Dropout(0.5)
+        self.flatten = nn.Flatten()
+
+    def forward(self, x):
+        x = x.unsqueeze(1)
+        x = F.relu(self.conv2d_1(x))
+        x = F.max_pool2d(x, (4, 3), (1, 3))
+        x = F.relu(self.conv2d_2(x))
+        x = F.max_pool2d(x, (1, 3), (1, 3))
+        x = self.flatten(x)
+        x = F.relu(self.dense_1(x))
+        x = self.dropout(x)
+        x = F.relu(self.dense_2(x))
+        x = self.dropout(x)
+        x = torch.sigmoid(self.dense_3(x))
+        return x.squeeze()
