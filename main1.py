@@ -25,7 +25,7 @@ from exp_run.models_pytorch import CustomRaw1 as CustomRaw
 from exp_run import config_1 as config
 import warnings
 warnings.filterwarnings('ignore')
-learn_rate_factor = 2
+learn_rate_factor = 3
 EPS = 1e-12
 
 
@@ -804,7 +804,7 @@ def final_organisation(scores, train_pred, val_pred, df, patience, epoch,
         main_logger.info(f"System will exit as the validation loss "
                          f"has not improved for {patience} epochs")
     print(f"System will exit as the validation loss has not "
-          "improved for {patience} epochs")
+          f"improved for {patience} epochs")
     util.save_model_outputs(model_dir,
                             df,
                             train_pred,
@@ -1037,8 +1037,8 @@ def train(model, workspace_files_dir):
     if checkpoint:
         start_epoch = util.load_model(checkpoint_run,
                                       model,
-                                      optimizer,
-                                      cuda)
+                                      cuda,
+                                      optimizer)
     else:
         start_epoch = 0
         # train_acc, train_fscore, train_loss, val_acc, val_fscore, val_loss
