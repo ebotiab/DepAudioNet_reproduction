@@ -1,3 +1,18 @@
+# Research fork of DepAudioNet reproduction
+
+This is a fork of [adbailey1/DepAudioNet_reproduction](https://github.com/adbailey1/DepAudioNet_reproduction). The original research, paper and reported results below belong to the upstream authors.
+
+The default `main` branch retains the upstream implementation. Additional work in this fork is available in:
+
+- [`fixbugs`](https://github.com/ebotiab/DepAudioNet_reproduction/tree/fixbugs): a small correction to `main1.py`.
+- [`personal`](https://github.com/ebotiab/DepAudioNet_reproduction/tree/personal): changes to the data generator and experiment configuration, explanatory comments, and a 1D CNN experiment.
+
+For a separate research pipeline with preprocessing, training and an exploration interface, see [ade-daic-woz](https://github.com/ebotiab/ade-daic-woz).
+
+---
+
+## Upstream documentation
+
 **Credit**
 
 This repository relates to our work in the EUSIPCO 2021 paper, "Gender Bias in Depression Detection Using Audio Features", https://arxiv.org/abs/2010.15120
